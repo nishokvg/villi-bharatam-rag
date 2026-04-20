@@ -170,7 +170,7 @@ def cohere_rerank(question: str, docs: list[Document]) -> list[Document]:
 def cohere_score_to_confidence(score: float) -> str:
     if score >= 0.75: return "high"
     if score >= 0.45: return "medium"
-    if score >= 0.15: return "low"
+    if score >= 0.005: return "low"
     return "not_found"
 
 
@@ -185,8 +185,7 @@ def node_detect_language(state: RAGState) -> RAGState:
 
 
 def node_retrieve(state: RAGState, ensemble_ret, chroma_ret) -> RAGState:
-    retriever = ensemble_ret if state["is_tamil"] else chroma_ret
-    docs = retriever.invoke(state["question"])
+    docs = ensemble_ret.invoke(state["question"])
     return {**state, "documents": docs}
 
 
@@ -278,7 +277,8 @@ def build_graph(ensemble_ret, chroma_ret):
     graph.add_node("generate",        node_generate)
     graph.add_node("validate",        node_validate)
     graph.add_node("skip_llm", lambda s: {**s, "answer": BharatamAnswer(
-        answer="இந்த தகவல் கொடுக்கப்பட்ட பக்கங்களில் இல்லை.",
+        answer="இந்த தகவல் கொடுக்கப்பட்ட பக்கங்களில் இல்லை." if s["is_tamil"]
+               else "This information was not found in the corpus.",
         evidence=[], confidence="not_found",
     )})
     graph.set_entry_point("detect_language")
