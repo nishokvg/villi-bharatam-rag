@@ -24,9 +24,10 @@ Ask questions in **Tamil or English** about *Villi Bharatam* — a 15th-century 
 | விராட பருவம் — Virata | 161 |
 | உத்தியோக பருவம் — Preparations | 243 |
 | வீட்டும பருவம் — Bhishma | 194 |
+| துரோண பருவம் — Drona | 331 |
 | கன்ன பருவம் — Karna | 160 |
 | சல்லிய-சௌப்திக பருவம் — Epilogue | 262 |
-| **Total** | **2,177 pages / 10,370 chunks** |
+| **Total** | **2,508 pages** |
 
 ## Stack
 - **LangGraph** — stateful retrieval pipeline with retry loop
