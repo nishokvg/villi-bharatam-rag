@@ -199,6 +199,8 @@ def node_rerank(state: RAGState) -> RAGState:
 
 
 def node_build_context(state: RAGState) -> RAGState:
+    if not state["reranked_docs"]:
+        return {**state, "context": ""}
     parts = []
     for doc in state["reranked_docs"]:
         m = doc.metadata
@@ -276,21 +278,14 @@ def build_graph(ensemble_ret, chroma_ret):
     graph.add_node("build_context",   node_build_context)
     graph.add_node("generate",        node_generate)
     graph.add_node("validate",        node_validate)
-    graph.add_node("skip_llm", lambda s: {**s, "answer": BharatamAnswer(
-        answer="இந்த தகவல் கொடுக்கப்பட்ட பக்கங்களில் இல்லை." if s["is_tamil"]
-               else "This information was not found in the corpus.",
-        evidence=[], confidence="not_found",
-    )})
     graph.set_entry_point("detect_language")
     graph.add_edge("detect_language", "retrieve")
     graph.add_edge("retrieve",        "rerank")
-    graph.add_conditional_edges("rerank", route_after_rerank,
-                                 {"generate": "build_context", "skip_llm": "skip_llm"})
+    graph.add_edge("rerank",          "build_context")
     graph.add_edge("build_context",   "generate")
     graph.add_edge("generate",        "validate")
     graph.add_conditional_edges("validate", route_after_validate,
                                  {"re_retrieve": "retrieve", "done": END})
-    graph.add_edge("skip_llm", END)
     return graph.compile()
 
 
